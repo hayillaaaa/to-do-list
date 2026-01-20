@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>To Do List</title>
+
+<style>
+  :root {
+    --lavender: #c7b9ff;
+    --deep-purple: #6b5ca5;
+    --soft-purple: #ede9ff;
+    --cream: #faf7ff;
+    --shadow: rgba(80, 60, 150, 0.18);
+  }
+
+  * {
+    box-sizing: border-box;
+    font-family: "Comic Neue", "Poppins", sans-serif;
+  }
+
+  body {
+    background: repeating-linear-gradient(
+      45deg,
+      #efeaff,
+      #efeaff 10px,
+      #f7f3ff 10px,
+      #f7f3ff 20px
+    );
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .notebook {
+    background: var(--cream);
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 12px 30px var(--shadow);
+    border: 3px dashed var(--lavender);
+  }
+
+  h1 {
+    font-size: 1.6rem;
+    color: var(--deep-purple);
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  .date {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #8d80c8;
+    margin-bottom: 15px;
+  }
+
+  .progress-container {
+    background: #ddd6ff;
+    border-radius: 20px;
+    overflow: hidden;
+    height: 14px;
+    margin-bottom: 15px;
+  }
+
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #b19cff, #d6c9ff);
+    transition: width 0.3s ease;
+  }
+
+  .add-task {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+
+  .add-task input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 12px;
+    border: 2px solid #c7b9ff;
+    font-size: 0.9rem;
+    background: #fff;
+  }
+
+  .add-task button {
+    background: var(--lavender);
+    border: none;
+    padding: 0 14px;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #4b3f85;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  li {
+    background: #fff;
+    padding: 10px 12px;
+    border-radius: 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+
+  li input[type="checkbox"] {
+    transform: scale(1.2);
+    accent-color: #9f8cff;
+  }
+
+  li.completed span {
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+
+  li button {
+    margin-left: auto;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 0.7rem;
+    color: #9b90cf;
+    margin-top: 10px;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="notebook">
+  <h1>Today's Tasks <3 </h1>
+  <div class="date" id="date"></div>
+
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <div class="add-task">
+    <input type="text" id="taskInput" placeholder="Write something magical…" />
+    <button onclick="addTask()">＋</button>
+  </div>
+
+  <ul id="taskList"></ul>
+
+  <footer>✦ you are doing great ! ✦</footer>
+</div>
+
+<script>
+  const taskList = document.getElementById("taskList");
+  const progressBar = document.getElementById("progressBar");
+  const taskInput = document.getElementById("taskInput");
+
+  document.getElementById("date").textContent =
+    new Date().toLocaleDateString(undefined, {
+      weekday: "long",
+      month: "long",
+      day: "numeric"
+    });
+
+  function saveTasks() {
+    localStorage.setItem("purpleTasks", taskList.innerHTML);
+    updateProgress();
+  }
+
+  function loadTasks() {
+    taskList.innerHTML = localStorage.getItem("purpleTasks") || "";
+    updateProgress();
+  }
+
+  function addTask() {
+    if (!taskInput.value.trim()) return;
+
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <input type="checkbox" onchange="toggleTask(this)">
+      <span>${taskInput.value}</span>
+      <button onclick="removeTask(this)">🗑️</button>
+    `;
+    taskList.appendChild(li);
+    taskInput.value = "";
+    saveTasks();
+  }
+
+  function toggleTask(checkbox) {
+    checkbox.parentElement.classList.toggle("completed");
+    saveTasks();
+  }
+
+  function removeTask(btn) {
+    btn.parentElement.remove();
+    saveTasks();
+  }
+
+  function updateProgress() {
+    const total = taskList.children.length;
+    const done = taskList.querySelectorAll(".completed").length;
+    const percent = total === 0 ? 0 : (done / total) * 100;
+    progressBar.style.width = percent + "%";
+  }
+
+  loadTasks();
+</script>
+
+</body>
+</html>
