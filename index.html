@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>To Do List</title>
+<title>to do list !</title>
 
 <style>
   :root {
     --lavender: #c7b9ff;
     --deep-purple: #6b5ca5;
-    --soft-purple: #ede9ff;
+    --soft-purple: #d5ccff;
     --cream: #faf7ff;
     --shadow: rgba(80, 60, 150, 0.18);
   }
@@ -53,7 +53,7 @@
     text-align: center;
     font-size: 0.9rem;
     color: #8d80c8;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
   }
 
   .progress-container {
@@ -61,7 +61,6 @@
     border-radius: 20px;
     overflow: hidden;
     height: 14px;
-    margin-bottom: 15px;
   }
 
   .progress-bar {
@@ -69,6 +68,13 @@
     width: 0%;
     background: linear-gradient(90deg, #b19cff, #d6c9ff);
     transition: width 0.3s ease;
+  }
+
+  .progress-text {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #7a6bb8;
+    margin: 6px 0 14px;
   }
 
   .add-task {
@@ -83,7 +89,6 @@
     border-radius: 12px;
     border: 2px solid #c7b9ff;
     font-size: 0.9rem;
-    background: #fff;
   }
 
   .add-task button {
@@ -142,12 +147,13 @@
 <body>
 
 <div class="notebook">
-  <h1>Today's Tasks <3 </h1>
+  <h1>Today's Tasks 💜</h1>
   <div class="date" id="date"></div>
 
   <div class="progress-container">
     <div class="progress-bar" id="progressBar"></div>
   </div>
+  <div class="progress-text" id="progressText">0 / 0 tasks • 0%</div>
 
   <div class="add-task">
     <input type="text" id="taskInput" placeholder="Write something magical…" />
@@ -156,12 +162,13 @@
 
   <ul id="taskList"></ul>
 
-  <footer>✦ you are doing great ! ✦</footer>
+  <footer>✦ you are doing a great job! ✦</footer>
 </div>
 
 <script>
   const taskList = document.getElementById("taskList");
   const progressBar = document.getElementById("progressBar");
+  const progressText = document.getElementById("progressText");
   const taskInput = document.getElementById("taskInput");
 
   document.getElementById("date").textContent =
@@ -208,8 +215,10 @@
   function updateProgress() {
     const total = taskList.children.length;
     const done = taskList.querySelectorAll(".completed").length;
-    const percent = total === 0 ? 0 : (done / total) * 100;
+    const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+
     progressBar.style.width = percent + "%";
+    progressText.textContent = `${done} / ${total} tasks • ${percent}%`;
   }
 
   loadTasks();
