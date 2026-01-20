@@ -1,227 +1,245 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>to do list !</title>
 
+<!-- Pangolin font -->
+<link href="https://fonts.googleapis.com/css2?family=Pangolin&display=swap" rel="stylesheet">
+
 <style>
-  :root {
-    --lavender: #c7b9ff;
-    --deep-purple: #6b5ca5;
-    --soft-purple: #d5ccff;
-    --cream: #faf7ff;
-    --shadow: rgba(80, 60, 150, 0.18);
-  }
+:root {
+  --lavender:#c7b9ff;
+  --deep:#6b5ca5;
+  --soft:#ede9ff;
+  --cream:#faf7ff;
+}
 
-  * {
-    box-sizing: border-box;
-    font-family: "Comic Neue", "Poppins", sans-serif;
-  }
+* {
+  box-sizing:border-box;
+  font-family:'Pangolin', cursive;
+}
 
-  body {
-    background: repeating-linear-gradient(
-      45deg,
-      #efeaff,
-      #efeaff 10px,
-      #f7f3ff 10px,
-      #f7f3ff 20px
-    );
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-  }
+/* body & notebook */
+body {
+  margin:0;
+  padding:20px;
+  background:linear-gradient(180deg,#f4f0ff,#fff);
+  overflow:hidden;
+}
 
-  .notebook {
-    background: var(--cream);
-    width: 100%;
-    max-width: 420px;
-    padding: 20px;
-    border-radius: 20px;
-    box-shadow: 0 12px 30px var(--shadow);
-    border: 3px dashed var(--lavender);
-  }
+.notebook {
+  position:relative;
+  max-width:420px;
+  margin:auto;
+  background:var(--cream);
+  padding:20px;
+  border-radius:20px;
+  border:3px dashed var(--lavender);
+  box-shadow:0 12px 30px rgba(0,0,0,.15);
+  z-index:2;
+}
 
-  h1 {
-    font-size: 1.6rem;
-    color: var(--deep-purple);
-    text-align: center;
-    margin-bottom: 4px;
-  }
+/* headings & date */
+h1 { text-align:center; color:var(--deep); margin:0; }
+.date, .affirmation {
+  text-align:center;
+  color:#8d80c8;
+  font-size:.95rem;
+  margin:6px 0;
+}
 
-  .date {
-    text-align: center;
-    font-size: 0.9rem;
-    color: #8d80c8;
-    margin-bottom: 12px;
-  }
+/* progress bar */
+.progress-container {
+  height:16px;
+  background:#ddd6ff;
+  border-radius:20px;
+  overflow:hidden;
+  margin-bottom:6px;
+}
+.progress-bar {
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#b19cff,#d6c9ff);
+  position:relative;
+  transition:.4s;
+}
+.progress-bar::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.8) 50%,transparent 70%);
+  animation:sparkle 2s infinite;
+}
+@keyframes sparkle { from{transform:translateX(-100%);} to{transform:translateX(100%);} }
 
-  .progress-container {
-    background: #ddd6ff;
-    border-radius: 20px;
-    overflow: hidden;
-    height: 14px;
-  }
+.progress-text {
+  text-align:center;
+  font-size:.8rem;
+  margin:6px 0 12px;
+  color:#7a6bb8;
+}
 
-  .progress-bar {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #b19cff, #d6c9ff);
-    transition: width 0.3s ease;
-  }
+/* input & select */
+.add-task { display:flex; gap:6px; margin-bottom:10px; }
+.add-task input, .add-task select {
+  flex:1;
+  padding:8px;
+  border-radius:12px;
+  border:2px solid var(--lavender);
+}
+.add-task button {
+  background:var(--lavender);
+  border:none;
+  border-radius:12px;
+  font-size:1.2rem;
+  padding:0 12px;
+}
 
-  .progress-text {
-    text-align: center;
-    font-size: 0.75rem;
-    color: #7a6bb8;
-    margin: 6px 0 14px;
-  }
+/* tasks */
+ul { list-style:none; padding:0; margin-top:10px; }
+li {
+  background:#fff;
+  padding:10px;
+  border-radius:14px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-bottom:8px;
+}
+li input[type=checkbox] {
+  appearance:none;
+  width:22px; height:22px;
+  border-radius:50%;
+  border:2px solid #b7a9ff;
+  cursor:pointer;
+}
+li input[type=checkbox]:checked {
+  background:radial-gradient(circle,#fff 30%,#9f8cff 31%);
+  transform:scale(1.15) rotate(-8deg);
+}
+.completed span { text-decoration:line-through; opacity:.6; }
 
-  .add-task {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 15px;
-  }
+/* priority tags */
+.tag { font-size:.7rem; padding:2px 6px; border-radius:8px; background:#eee; }
+.tag.high { background:#ffd6e9; }
+.tag.low { background:#e6f2ff; }
 
-  .add-task input {
-    flex: 1;
-    padding: 10px;
-    border-radius: 12px;
-    border: 2px solid #c7b9ff;
-    font-size: 0.9rem;
-  }
+/* celebration */
+.celebration { display:none; text-align:center; margin-top:8px; animation:pop .5s; }
+@keyframes pop { from{transform:scale(.7);opacity:0;} to{transform:scale(1);opacity:1;} }
 
-  .add-task button {
-    background: var(--lavender);
-    border: none;
-    padding: 0 14px;
-    border-radius: 12px;
-    font-size: 1.2rem;
-    cursor: pointer;
-    color: #4b3f85;
-  }
+/* daily reset */
+.controls { display:flex; justify-content:space-between; margin-top:10px; }
+button.reset { background:none; border:none; color:#6b5ca5; cursor:pointer; }
 
-  ul {
-    list-style: none;
-    padding: 0;
-  }
-
-  li {
-    background: #fff;
-    padding: 10px 12px;
-    border-radius: 14px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 4px 12px var(--shadow);
-  }
-
-  li input[type="checkbox"] {
-    transform: scale(1.2);
-    accent-color: #9f8cff;
-  }
-
-  li.completed span {
-    text-decoration: line-through;
-    opacity: 0.6;
-  }
-
-  li button {
-    margin-left: auto;
-    background: none;
-    border: none;
-    font-size: 1rem;
-    cursor: pointer;
-  }
-
-  footer {
-    text-align: center;
-    font-size: 0.7rem;
-    color: #9b90cf;
-    margin-top: 10px;
-  }
+/* floating stars background */
+.star {
+  position:absolute;
+  color:#d8d1ff;
+  font-size:12px;
+  opacity:0.4;
+  animation: floatStar linear infinite;
+}
+@keyframes floatStar { from { transform:translateY(100vh); } to { transform:translateY(-10vh); } }
 </style>
 </head>
 
 <body>
 
-<div class="notebook">
-  <h1>Today's Tasks 💜</h1>
-  <div class="date" id="date"></div>
+<!-- floating stars -->
+<script>
+for(let i=0;i<25;i++){
+  const s=document.createElement("div");
+  s.className="star";
+  s.textContent=Math.random()>0.5?"⭐":"✦";
+  s.style.left=Math.random()*100+"vw";
+  s.style.animationDuration=10+Math.random()*20+"s";
+  document.body.appendChild(s);
+}
+</script>
 
-  <div class="progress-container">
-    <div class="progress-bar" id="progressBar"></div>
-  </div>
-  <div class="progress-text" id="progressText">0 / 0 tasks • 0%</div>
+<div class="notebook" id="notebook">
+<h1>Today's Tasks 💜</h1>
+<div class="date" id="date"></div>
+<div class="affirmation" id="affirmation"></div>
 
-  <div class="add-task">
-    <input type="text" id="taskInput" placeholder="Write something magical…" />
-    <button onclick="addTask()">＋</button>
-  </div>
+<div class="progress-container">
+  <div class="progress-bar" id="progressBar"></div>
+</div>
+<div class="progress-text" id="progressText">0 / 0 • 0%</div>
 
-  <ul id="taskList"></ul>
+<div class="add-task">
+  <input id="taskInput" placeholder="Write something magical..." />
+  <select id="priority">
+    <option value="💜">normal</option>
+    <option value="⭐">high</option>
+    <option value="🌙">low</option>
+  </select>
+  <button onclick="addTask()">＋</button>
+</div>
 
-  <footer>✦ you are doing a great job! ✦</footer>
+<ul id="taskList"></ul>
+
+<div class="celebration" id="celebration">🎉 Done for today !</div>
+
+<div class="controls">
+  <button class="reset" onclick="resetDay()">🔄 New day ahead !</button>
+</div>
 </div>
 
 <script>
-  const taskList = document.getElementById("taskList");
-  const progressBar = document.getElementById("progressBar");
-  const progressText = document.getElementById("progressText");
-  const taskInput = document.getElementById("taskInput");
+const affirmations=[
+"You’re doing amazing 💜",
+"Small steps still count 🪐",
+"Be gentle with yourself 🌙",
+"You showed up today ✨",
+"Progress over perfection ⭐"
+];
 
-  document.getElementById("date").textContent =
-    new Date().toLocaleDateString(undefined, {
-      weekday: "long",
-      month: "long",
-      day: "numeric"
-    });
+document.getElementById("affirmation").textContent =
+ affirmations[new Date().getDate()%affirmations.length];
 
-  function saveTasks() {
-    localStorage.setItem("purpleTasks", taskList.innerHTML);
-    updateProgress();
-  }
+document.getElementById("date").textContent =
+ new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
 
-  function loadTasks() {
-    taskList.innerHTML = localStorage.getItem("purpleTasks") || "";
-    updateProgress();
-  }
+const taskList=document.getElementById("taskList");
 
-  function addTask() {
-    if (!taskInput.value.trim()) return;
+function addTask(){
+ const t=document.getElementById("taskInput");
+ if(!t.value.trim())return;
+ const p=document.getElementById("priority").value;
+ const li=document.createElement("li");
+ li.innerHTML=`<input type="checkbox" onchange="toggleTask(this,event)">
+ <span>${t.value}</span><span class="tag ${p}">${p}</span>
+ <button onclick="this.parentElement.remove();update()">🗑️</button>`;
+ taskList.appendChild(li);
+ t.value="";
+ update();
+}
 
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <input type="checkbox" onchange="toggleTask(this)">
-      <span>${taskInput.value}</span>
-      <button onclick="removeTask(this)">🗑️</button>
-    `;
-    taskList.appendChild(li);
-    taskInput.value = "";
-    saveTasks();
-  }
+function toggleTask(cb,e){
+ cb.parentElement.classList.toggle("completed");
+ document.getElementById("popSound").play();
+ update();
+}
 
-  function toggleTask(checkbox) {
-    checkbox.parentElement.classList.toggle("completed");
-    saveTasks();
-  }
+function update(){
+ const total=taskList.children.length;
+ const done=document.querySelectorAll(".completed").length;
+ const pct=total?Math.round(done/total*100):0;
+ document.getElementById("progressBar").style.width=pct+"%";
+ document.getElementById("progressText").textContent=`${done} / ${total} • ${pct}%`;
+ document.getElementById("celebration").style.display= total && done===total?"block":"none";
+}
 
-  function removeTask(btn) {
-    btn.parentElement.remove();
-    saveTasks();
-  }
-
-  function updateProgress() {
-    const total = taskList.children.length;
-    const done = taskList.querySelectorAll(".completed").length;
-    const percent = total === 0 ? 0 : Math.round((done / total) * 100);
-
-    progressBar.style.width = percent + "%";
-    progressText.textContent = `${done} / ${total} tasks • ${percent}%`;
-  }
-
-  loadTasks();
+function resetDay(){
+ if(confirm("Reset today’s list?")){
+   taskList.innerHTML="";
+   update();
+ }
+}
 </script>
 
 </body>
