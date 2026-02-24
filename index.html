@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>to do list !</title>
 
-<!-- Pangolin font -->
 <link href="https://fonts.googleapis.com/css2?family=Pangolin&display=swap" rel="stylesheet">
 
 <style>
@@ -21,12 +20,25 @@
   font-family:'Pangolin', cursive;
 }
 
-/* body & notebook */
 body {
   margin:0;
   padding:20px;
   background:linear-gradient(180deg,#f4f0ff,#fff);
-  overflow:hidden;
+  overflow-x:hidden;
+}
+
+/* floating stars background */
+.star {
+  position:absolute;
+  color:#d8d1ff;
+  font-size:12px;
+  opacity:0.4;
+  animation: floatStar linear infinite;
+  pointer-events:none;
+}
+@keyframes floatStar {
+  from { transform:translateY(100vh); }
+  to { transform:translateY(-10vh); }
 }
 
 .notebook {
@@ -41,8 +53,8 @@ body {
   z-index:2;
 }
 
-/* headings & date */
 h1 { text-align:center; color:var(--deep); margin:0; }
+
 .date, .affirmation {
   text-align:center;
   color:#8d80c8;
@@ -56,7 +68,6 @@ h1 { text-align:center; color:var(--deep); margin:0; }
   background:#ddd6ff;
   border-radius:20px;
   overflow:hidden;
-  margin-bottom:6px;
 }
 .progress-bar {
   height:100%;
@@ -72,7 +83,10 @@ h1 { text-align:center; color:var(--deep); margin:0; }
   background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.8) 50%,transparent 70%);
   animation:sparkle 2s infinite;
 }
-@keyframes sparkle { from{transform:translateX(-100%);} to{transform:translateX(100%);} }
+@keyframes sparkle {
+  from{transform:translateX(-100%);}
+  to{transform:translateX(100%);}
+}
 
 .progress-text {
   text-align:center;
@@ -81,7 +95,7 @@ h1 { text-align:center; color:var(--deep); margin:0; }
   color:#7a6bb8;
 }
 
-/* input & select */
+/* input */
 .add-task { display:flex; gap:6px; margin-bottom:10px; }
 .add-task input, .add-task select {
   flex:1;
@@ -108,6 +122,7 @@ li {
   align-items:center;
   margin-bottom:8px;
 }
+
 li input[type=checkbox] {
   appearance:none;
   width:22px; height:22px;
@@ -119,36 +134,62 @@ li input[type=checkbox]:checked {
   background:radial-gradient(circle,#fff 30%,#9f8cff 31%);
   transform:scale(1.15) rotate(-8deg);
 }
-.completed span { text-decoration:line-through; opacity:.6; }
+
+.completed span.task-text {
+  text-decoration:line-through;
+  opacity:.6;
+}
 
 /* priority tags */
-.tag { font-size:.7rem; padding:2px 6px; border-radius:8px; background:#eee; }
+.tag {
+  font-size:.7rem;
+  padding:2px 6px;
+  border-radius:8px;
+  background:#eee;
+}
 .tag.high { background:#ffd6e9; }
 .tag.low { background:#e6f2ff; }
 
 /* celebration */
-.celebration { display:none; text-align:center; margin-top:8px; animation:pop .5s; }
-@keyframes pop { from{transform:scale(.7);opacity:0;} to{transform:scale(1);opacity:1;} }
-
-/* daily reset */
-.controls { display:flex; justify-content:space-between; margin-top:10px; }
-button.reset { background:none; border:none; color:#6b5ca5; cursor:pointer; }
-
-/* floating stars background */
-.star {
-  position:absolute;
-  color:#d8d1ff;
-  font-size:12px;
-  opacity:0.4;
-  animation: floatStar linear infinite;
+.celebration {
+  display:none;
+  text-align:center;
+  margin-top:8px;
+  animation:pop .5s;
 }
-@keyframes floatStar { from { transform:translateY(100vh); } to { transform:translateY(-10vh); } }
+@keyframes pop {
+  from{transform:scale(.7);opacity:0;}
+  to{transform:scale(1);opacity:1;}
+}
+
+.controls {
+  display:flex;
+  justify-content:space-between;
+  margin-top:10px;
+}
+button.reset {
+  background:none;
+  border:none;
+  color:#6b5ca5;
+  cursor:pointer;
+}
+
+/* floating moon/star when checking */
+.float-sticker {
+  position:absolute;
+  font-size:20px;
+  animation:floatUp 1.5s ease-out forwards;
+  pointer-events:none;
+}
+@keyframes floatUp {
+  from{transform:translateY(0);opacity:1;}
+  to{transform:translateY(-80px);opacity:0;}
+}
 </style>
 </head>
 
 <body>
 
-<!-- floating stars -->
 <script>
 for(let i=0;i<25;i++){
   const s=document.createElement("div");
@@ -160,7 +201,7 @@ for(let i=0;i<25;i++){
 }
 </script>
 
-<div class="notebook" id="notebook">
+<div class="notebook">
 <h1>Today's Tasks 💜</h1>
 <div class="date" id="date"></div>
 <div class="affirmation" id="affirmation"></div>
@@ -173,9 +214,9 @@ for(let i=0;i<25;i++){
 <div class="add-task">
   <input id="taskInput" placeholder="Write something magical . . ." />
   <select id="priority">
-    <option value="💜">normal</option>
-    <option value="⭐">high</option>
-    <option value="🌙">low</option>
+    <option value="normal">💜 normal</option>
+    <option value="high">⭐ high</option>
+    <option value="low">🌙 low</option>
   </select>
   <button onclick="addTask()">＋</button>
 </div>
@@ -209,41 +250,86 @@ document.getElementById("date").textContent =
  new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
 
 const taskList=document.getElementById("taskList");
+let tasks = JSON.parse(localStorage.getItem("scrapbookTasks")) || [];
+
+function saveTasks(){
+  localStorage.setItem("scrapbookTasks", JSON.stringify(tasks));
+}
+
+function render(){
+  taskList.innerHTML="";
+  tasks.forEach((task,index)=>{
+    const li=document.createElement("li");
+    if(task.completed) li.classList.add("completed");
+
+    li.innerHTML=`
+      <input type="checkbox" ${task.completed?"checked":""}
+      onchange="toggleTask(${index}, event)">
+      <span class="task-text">${task.text}</span>
+      <span class="tag ${task.priority}">${task.priority}</span>
+      <button onclick="deleteTask(${index})">🗑️</button>
+    `;
+    taskList.appendChild(li);
+  });
+  update();
+}
 
 function addTask(){
  const t=document.getElementById("taskInput");
  if(!t.value.trim())return;
  const p=document.getElementById("priority").value;
- const li=document.createElement("li");
- li.innerHTML=`<input type="checkbox" onchange="toggleTask(this,event)">
- <span>${t.value}</span><span class="tag ${p}">${p}</span>
- <button onclick="this.parentElement.remove();update()">🗑️</button>`;
- taskList.appendChild(li);
+ tasks.push({text:t.value,priority:p,completed:false});
  t.value="";
- update();
+ saveTasks();
+ render();
 }
 
-function toggleTask(cb,e){
- cb.parentElement.classList.toggle("completed");
+function toggleTask(index,e){
+ tasks[index].completed=!tasks[index].completed;
  document.getElementById("popSound").play();
- update();
+ spawnSticker(e);
+ saveTasks();
+ render();
+}
+
+function deleteTask(index){
+ tasks.splice(index,1);
+ saveTasks();
+ render();
 }
 
 function update(){
- const total=taskList.children.length;
- const done=document.querySelectorAll(".completed").length;
+ const total=tasks.length;
+ const done=tasks.filter(t=>t.completed).length;
  const pct=total?Math.round(done/total*100):0;
+
  document.getElementById("progressBar").style.width=pct+"%";
- document.getElementById("progressText").textContent=`${done} / ${total} • ${pct}%`;
- document.getElementById("celebration").style.display= total && done===total?"block":"none";
+ document.getElementById("progressText").textContent=
+ `${done} / ${total} • ${pct}%`;
+
+ document.getElementById("celebration").style.display=
+ total && done===total?"block":"none";
 }
 
 function resetDay(){
  if(confirm("Reset today’s list?")){
-   taskList.innerHTML="";
-   update();
+   tasks=[];
+   saveTasks();
+   render();
  }
 }
+
+function spawnSticker(e){
+ const sticker=document.createElement("div");
+ sticker.className="float-sticker";
+ sticker.textContent=Math.random()>0.5?"🌙":"⭐";
+ sticker.style.left=e.clientX+"px";
+ sticker.style.top=e.clientY+"px";
+ document.body.appendChild(sticker);
+ setTimeout(()=>sticker.remove(),1500);
+}
+
+render();
 </script>
 
 </body>
